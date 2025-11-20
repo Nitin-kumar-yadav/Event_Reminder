@@ -2,7 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./connection/db.js";
 import cors from "cors";
-import router from "./router/user.routes.js";
+import authRouter from "./router/user.routes.js";
+import eventRouter from "./router/event.routes.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config({});
 
@@ -17,7 +19,9 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use("/api/v1", router);
+app.use(cookieParser());
+app.use("/api/v1", authRouter);
+app.use("/api/v1", eventRouter);
 
 app.listen(PORT, () => {
   try {
