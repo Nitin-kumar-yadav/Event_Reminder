@@ -11,16 +11,18 @@ const Login = () => {
         email: '',
         password: ''
     });
-
+    const [waiting, setWaiting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const { login, isLoggingIn } = useUserAuthStore();
 
     const handleLogin = async (e) => {
+        setWaiting(true);
         e.preventDefault();
         login(formData).catch((err) => {
             setError('Login failed. Please check your credentials and try again.');
         });
+        setWaiting(false);
     }
 
     const handleChange = (e) => {
@@ -115,8 +117,22 @@ const Login = () => {
                        text-white font-bold rounded-lg shadow-lg hover:shadow-xl 
                        transform hover:-translate-y-0.5 transition-all duration-200
                        flex items-center justify-center gap-2"
+                        disabled={waiting}
                     >
-                        Log In <ArrowRight size={18} />
+                        {
+                            waiting ? (
+                                toast.promise(
+                                    login(formData),
+                                    {
+                                        loading: 'Logging in...',
+                                        success: <b>Login successful!</b>,
+                                        error: <b>Login failed.</b>,
+                                    }
+                                )
+                            ) : (
+                                <> Log In <ArrowRight size={18} /></>
+                            )
+                        }
                     </button>
                 </form>
 

@@ -15,10 +15,12 @@ const Signup = () => {
     const { signup, isSignUp } = useUserAuthStore();
 
     const [showPassword, setShowPassword] = useState(false);
+    const [waiting, setWaiting] = useState(false);
     const [error, setError] = useState('');
 
 
     const handleSignup = async (e) => {
+        setWaiting(true);
         e.preventDefault();
 
         const { username, email, password, confirmPassword } = formData;
@@ -32,7 +34,9 @@ const Signup = () => {
             await signup(formData);
         } catch (err) {
             setError('Signup failed. Please try again.');
+
         }
+        setWaiting(false);
     }
 
     const handleChange = (e) => {
@@ -167,8 +171,22 @@ const Signup = () => {
                        text-white font-bold rounded-lg shadow-lg hover:shadow-xl 
                        transform hover:-translate-y-0.5 transition-all duration-200
                        flex items-center justify-center gap-2"
+                        disabled={waiting}
                     >
-                        Sign Up <ArrowRight size={18} />
+                        {
+                            waiting ? (
+                                toast.promise(
+                                    signup(data),
+                                    {
+                                        loading: 'Saving...',
+                                        success: <b>Signup successful!</b>,
+                                        error: <b>Signup failed.</b>,
+                                    }
+                                )
+                            ) : (
+                                <> Sign Up <ArrowRight size={18} /></>
+                            )
+                        }
                     </button>
                 </form>
 
