@@ -1,27 +1,68 @@
-import React, { useEffect, useState } from 'react';
-import { Clock, Droplet, Wind, MapPin } from 'lucide-react';
-import toast from 'react-hot-toast';
+import React, { useEffect, useState } from 'react'
+import { Clock2, ThermometerSun } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
-const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
-const formatTime = (date) => date.toLocaleTimeString('en-US', {
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
-});
-
-const formatFullDate = (date) => date.toLocaleDateString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-});
-
-const Dashboard = () => {
-    const [dateTime, setDateTime] = useState(new Date());
-
+const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
+function Dashboard() {
     const [latitude, setLatitude] = useState(null);
     const [longitude, setLongitude] = useState(null);
-    const [error, setError] = useState(null);
-
     const [weatherData, setWeatherData] = useState(null);
-    const [weatherLoading, setWeatherLoading] = useState(false);
+    const [dateTime, setDateTime] = useState(new Date());
+
+    const getCoordinates = async () => {
+        if (navigator.geolocation) {
+            await navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLatitude(position.coords.latitude);
+                    setLongitude(position.coords.longitude);
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                }
+            );
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    }
+
+    async function fetchWeather() {
+        try {
+            const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`)
+            setWeatherData(response.data);
+            console.log("Weather Data:", response.data.timezone);
+        } catch (error) {
+            toast.error("Failed to fetch weather data.");
+            console.error("Error fetching weather data:", error);
+
+        }
+    }
+    useEffect(() => {
+        getCoordinates();
+        if (latitude && longitude) {
+            fetchWeather();
+        }
+        else {
+            toast.error("Unable to retrieve location.");
+            console.log("Waiting for coordinates...");
+        }
+    }, [latitude, longitude]);
+
+    const formatTime = (date) => date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
+    });
+    const formatFullDate = (date) => date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: 'Asia/Kolkata'
+    });
 
     useEffect(() => {
         const timerId = setInterval(() => {
@@ -32,134 +73,52 @@ const Dashboard = () => {
             clearInterval(timerId);
         };
     }, []);
-
-    useEffect(() => {
-        if (!navigator.geolocation) {
-            const notSupportedMessage = "Geolocation is not supported by your browser.";
-            setError(notSupportedMessage);
-            toast.error(notSupportedMessage);
-            return;
-        }
-
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        };
-
-        const successCallback = (position) => {
-            const { latitude, longitude } = position.coords;
-            setLatitude(latitude);
-            setLongitude(longitude);
-            setError(null);
-        };
-
-        const errorCallback = (err) => {
-            let errorMessage;
-            if (err.code === err.PERMISSION_DENIED) {
-                errorMessage = "Geolocation permission denied. Please enable it in your browser settings.";
-            } else if (err.code === err.POSITION_UNAVAILABLE) {
-                errorMessage = "Location information is unavailable.";
-            } else if (err.code === err.TIMEOUT) {
-                errorMessage = "Timed out waiting for location.";
-            } else {
-                errorMessage = `Geolocation error: Code ${err.code}`;
-            }
-
-            setError(errorMessage);
-            toast.error(errorMessage);
-            setLatitude(null);
-            setLongitude(null);
-        };
-
-        navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
-
-    }, []);
-    useEffect(() => {
-        if (latitude !== null && longitude !== null) {
-            const fetchWeather = async () => {
-                setWeatherLoading(true);
-                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric`;
-
-                try {
-                    const response = await axios.get(url);
-                    if (!response.data.ok) {
-                        throw new Error(`Weather fetch failed: ${response.statusText}`);
-                    }
-                    const data = await response.data;
-                    setWeatherData(data);
-                } catch (e) {
-                    const errorMessage = `Failed to load weather: ${e.message}`;
-                    setError(errorMessage);
-                    toast.error(errorMessage);
-                } finally {
-                    setWeatherLoading(false);
-                }
-            };
-            fetchWeather();
-        }
-    }, [latitude, longitude]);
-
-    const tempInCelsius = weatherData?.main?.temp?.toFixed(1);
-    const city = weatherData?.name || "Unknown Location";
-    const weatherDescription = weatherData?.weather?.[0]?.description;
-    const humidity = weatherData?.main?.humidity;
-    const windSpeed = weatherData?.wind?.speed;
-
     const time = formatTime(dateTime);
     const date = formatFullDate(dateTime);
-    console.log(WEATHER_API_KEY)
-
 
     return (
-        <div className="pt-20">
-            <div className="flex flex-col md:flex-row justify-center items-stretch gap-5 max-w-8xl mx-auto px-5">
-
-                {/* --- Time and Date Card --- */}
-                <div className="w-full md:w-1/2 min-h-[20vh] border-2 rounded-3xl p-5 bg-white-400 bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border-gray-100 dark:border-gray-700 dark:bg-gray-700 dark:text-white shadow-lg">
-                    <div className="flex justify-between items-start mb-2">
-                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-300">CURRENT TIME & DATE</p>
-                        <Clock className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+        <div className='pt-20'>
+            <div className="flex flex-row justify-between max-w-8xl mx-5 h-[150px] ">
+                <div className="flex flex-col align-center justify-items-start w-[49%] rounded-2xl h-[150px] px-4 pt-5 bg-white/30 dark:bg-black/20 
+                        backdrop-blur-md 
+                        border-b border-white/20 dark:border-white/10
+                        shadow-lg transition-all duration-300">
+                    <div className="">
+                        <h1 className="text-base text-gray-500 font-medium">Current Time</h1>
                     </div>
-                    <h2 className="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-2">
-                        {time}
-                    </h2>
-                    <p className="text-xl font-medium text-gray-800 dark:text-gray-200">
-                        {date}
-                    </p>
+                    <div className="flex flex-row justify-between aligin-center text-center">
+                        <h1 className="text-5xl text-center aligin-center font-bold pt-2 text-transparent bg-clip-text 
+               bg-gradient-to-r from-indigo-500 to-purple-400 ">{time}</h1>
+                        <div className="">
+                            <Clock2 className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                    </div>
+                    <div className="">
+                        <h1 className="text-base text-gray-500 font-medium">{date}</h1>
+                    </div>
+                </div>
+                <div className="flex flex-col align-center justify-items-start w-[49%] rounded-2xl h-[150px] px-4 pt-5 bg-white/30 dark:bg-black/20 
+                        backdrop-blur-md 
+                        border-b border-white/20 dark:border-white/10
+                        shadow-lg transition-all duration-300">
+                    <div className="">
+                        <h1 className="text-base text-gray-500 font-medium">Current Weather</h1>
+                    </div>
+                    <div className="flex flex-row justify-between aligin-center text-center">
+                        <h1 className="text-5xl text-center aligin-center font-bold pt-2 text-transparent bg-clip-text 
+               bg-gradient-to-r from-indigo-500 to-purple-400 ">{Math.round(weatherData.main.temp - 273.15)} C</h1>
+                        <div className="">
+                            <ThermometerSun className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                    </div>
+                    <div className="">
+                        <h1 className="text-base text-gray-500 font-medium">{weatherData.name}, {weatherData.sys.country}</h1>
+                    </div>
                 </div>
 
-                {/* --- Weather Card --- */}
-                <div className="w-full md:w-1/2 min-h-[20vh] border-2 rounded-3xl p-5 bg-white-400 bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border-gray-100 dark:border-gray-700 dark:bg-gray-700 dark:text-white shadow-lg">
-                    <div className="flex justify-between items-start mb-2">
-                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-300">WEATHER IN {city.toUpperCase()}</p>
-                        <MapPin className="w-6 h-6 text-red-500" />
-                    </div>
-
-                    {weatherLoading ? (
-                        <p className="text-xl font-medium text-gray-600 dark:text-gray-400">Loading weather...</p>
-                    ) : error ? (
-                        <p className="text-red-500">{error}</p>
-                    ) : tempInCelsius ? (
-                        <>
-                            <h2 className="text-5xl font-extrabold text-green-600 dark:text-green-400 mb-2">
-                                {tempInCelsius}°C
-                            </h2>
-                            <p className="text-xl font-medium text-gray-800 dark:text-gray-200 capitalize">
-                                {weatherDescription}
-                            </p>
-                            <div className="flex gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                <p className='flex items-center'><Droplet className='w-4 h-4 mr-1' /> Humidity: {humidity}%</p>
-                                <p className='flex items-center'><Wind className='w-4 h-4 mr-1' /> Wind: {windSpeed} m/s</p>
-                            </div>
-                        </>
-                    ) : (
-                        <p className="text-xl font-medium text-gray-600 dark:text-gray-400">Enable location to see weather.</p>
-                    )}
-                </div>
             </div>
         </div>
-    );
+    )
 }
 
-export default Dashboard;
+export default Dashboard

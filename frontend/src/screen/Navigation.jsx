@@ -24,7 +24,8 @@ const Navigation = () => {
                         shadow-lg transition-all duration-300">
 
             <div className="text-xl font-bold tracking-wide text-gray-800 dark:text-white drop-shadow-sm">
-                <Link to="/">Event Reminder</Link>
+                <Link className='text-transparent bg-clip-text 
+               bg-gradient-to-r from-indigo-500 to-purple-400' to="/">Event Reminder</Link>
             </div>
 
             <div>
