@@ -19,26 +19,22 @@ const App = () => {
     document.documentElement.classList.add(theme);
 
     checkAuth()
-  }, [theme, checkAuth]);
+  }, [theme]);
 
   if (isChecking) return <Loader />;
-  let width = window.innerWidth;
-  if (width < 768) {
-    toast.error('Please switch to desktop view')
-    return <div>
-      <h1 className='text-white text-2xl font-bold text-center mt-10'>Please switch to desktop view</h1>
-    </div>
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white">
       <Navigation />
       <Routes>
-        <Route path='/' element={authUser ? <Dashboard /> : <Navigate to={'/login'} />} />
+        <Route path='/' element={authUser ? <Dashboard /> : <Home />} />
         <Route path='/signup' element={!authUser ? <Signup /> : <Navigate to={'/'} />} />
         <Route path='/login' element={!authUser ? <Login /> : <Navigate to={'/'} />} />
       </Routes>
-      <Toaster position="bottom-right" reverseOrder={false} />
+      <Toaster position="bottom-right" reverseOrder={true} toastOptions={{
+        duration: 5000,
+
+      }} />
     </div>
   )
 }

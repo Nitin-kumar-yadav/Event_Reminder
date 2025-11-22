@@ -36,15 +36,13 @@ const Signup = () => {
     }
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.username]: e.target.value });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
 
         if (error) {
             toast.error(error);
             setError('');
         }
     };
-
-
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4

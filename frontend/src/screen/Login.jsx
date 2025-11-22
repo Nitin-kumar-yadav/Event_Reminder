@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import ThemeToggle from '../components/ThemeToggle'; // Assuming you have this from before
+import ThemeToggle from '../components/ThemeToggle';
 import toast from 'react-hot-toast';
 import { useUserAuthStore } from '../store/userAuthStore';
 
@@ -116,14 +116,14 @@ const Login = () => {
                        transform hover:-translate-y-0.5 transition-all duration-200
                        flex items-center justify-center gap-2"
                     >
-                        Sign Up <ArrowRight size={18} />
+                        Log In <ArrowRight size={18} />
                     </button>
                 </form>
 
                 <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
                     Do not have an account?{' '}
                     <Link to="/Signup" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                        Log in
+                        Sign Up
                     </Link>
                 </div>
 

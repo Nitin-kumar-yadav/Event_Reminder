@@ -11,6 +11,10 @@ const Navigation = () => {
         checkAuth()
     }, [checkAuth]);
 
+    const logout = () => {
+        useUserAuthStore.getState().logout()
+    }
+
     return (
         <nav className="fixed top-0 left-0 w-full z-50 h-16 px-6
                         flex items-center justify-between
@@ -36,14 +40,24 @@ const Navigation = () => {
                     </li>
                     {
                         authUser ? (
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
-                                >
-                                    Dashboard
-                                </Link>
-                            </li>
+                            <>
+                                <li>
+                                    <Link
+                                        to="/"
+                                        className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={logout}
+                                        className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+                                    >
+                                        Logout
+                                    </button>
+                                </li>
+                            </>
                         ) : (
                             <>
                                 <li>

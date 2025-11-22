@@ -4,7 +4,15 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 export const useUserAuthStore = create((set, get) => ({
-  authUser: JSON.parse(localStorage.getItem("authUser")) || null,
+  authUser: (() => {
+    const storedUser = localStorage.getItem("authUser");
+    try {
+      return storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+    } catch (e) {
+      console.error("Error parsing authUser from localStorage:", e);
+      return null;
+    }
+  })(),
   isChecking: true,
   isSignUp: false,
   isLoggingIn: false,
@@ -14,12 +22,7 @@ export const useUserAuthStore = create((set, get) => ({
       const response = await axios.get(`${BasicUrl}/api/v1/check-auth`, {
         withCredentials: true,
       });
-      if (response.ok) {
-        const data = await response.json();
-        set({ authUser: data.user });
-      } else {
-        set({ authUser: null });
-      }
+      set({ authUser: response.data.user });
     } catch (error) {
       console.error("Error checking auth:", error);
       set({ authUser: null });
@@ -38,8 +41,10 @@ export const useUserAuthStore = create((set, get) => ({
         },
         withCredentials: true,
       });
-      set({ authUser: res.data.user });
-      toast.success(`Signup successful! Welcome, ${res.data.user.username}`);
+      const user = res.data.user || res.data;
+      set({ authUser: user });
+      localStorage.setItem("authUser", JSON.stringify(user));
+      toast.success(`Signup successful! Welcome, ${user.username}`);
     } catch (error) {
       console.error("Signup error:", error);
       toast.error(
@@ -59,6 +64,10 @@ export const useUserAuthStore = create((set, get) => ({
         },
         withCredentials: true,
       });
+      const user = res.data.user || res.data;
+      set({ authUser: user });
+      localStorage.setItem("authUser", JSON.stringify(user));
+      toast.success(`Login successful! Welcome, ${user.username}`);
     } catch (error) {
       console.error("Login error:", error);
       toast.error(
@@ -71,9 +80,9 @@ export const useUserAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
-      await axios.post(
+      await axios.get(
         `${BasicUrl}/api/v1/logout`,
-        {},
+
         {
           withCredentials: true,
         }
