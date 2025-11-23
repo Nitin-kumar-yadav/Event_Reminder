@@ -1,11 +1,16 @@
 import Event from "../model/eventModel.js";
+import User from "../model/userModel.js";
 
 export const createEvent = async (req, res) => {
   const { title, description, time, date } = req.body;
+  const userId = req.user._id;
   if ((!title || !description, !date)) {
     res.status(400).json({ message: "Title, Description, Date is required" });
   }
   try {
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
     const event = await Event.findOne({ title });
     if (event) {
       res.status(400).json({ message: "Event already added" });
@@ -16,7 +21,14 @@ export const createEvent = async (req, res) => {
       description,
       time,
       date,
+      user: userId,
     });
+    const user = await User.findById(userId);
+    if (!user.events) {
+      user.events = [];
+    }
+    user.events.push(newEvent._id);
+    await user.save();
     const savedEvent = await newEvent.save();
     if (!savedEvent) {
       res.status(400).json({ message: "Event is not save in the database" });
@@ -27,6 +39,7 @@ export const createEvent = async (req, res) => {
       description: savedEvent.description,
       time: savedEvent.time,
       date: savedEvent.date,
+      user: savedEvent.user,
     });
   } catch (error) {
     console.error("Create Event Error", error);
@@ -36,23 +49,37 @@ export const createEvent = async (req, res) => {
 
 export const viewEvent = async (req, res) => {
   try {
-    const { eventId } = req.params;
-    if (!eventId) {
-      return res.status(400).json({ message: "Event ID is required" });
-    }
-    const showEvent = await Event.findById(eventId);
+    const { userId } = req.params;
 
-    if (!showEvent) {
-      return res.status(404).json({ message: "Event not found" });
+    // 2. Correct validation message for missing parameter
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ message: "User ID is required in the URL." });
     }
+
+    // 3. Find all events linked to this user ID
+    // Note: Mongoose automatically converts the string ID to an ObjectId
+    const showEvent = await Event.find({ user: userId });
+
+    // 4. Correctly check if the array is empty (no events found)
+    if (showEvent.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No events found for this user." });
+    }
+
+    // 5. Success: Return the array of events
     res.status(200).json(showEvent);
   } catch (error) {
     console.log("Error in viewEvent:", error.message);
 
+    // Mongoose CastError usually occurs if the ID format is invalid (e.g., too short)
     if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid Event ID format" });
+      return res.status(400).json({ message: "Invalid User ID format." });
     }
 
+    // General server error
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

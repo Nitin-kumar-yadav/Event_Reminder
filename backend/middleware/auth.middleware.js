@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import User from "../model/userModel.js";
-// Note: dotenv.config() is usually best placed in your main server.js file, not here.
 
 export const protectRoute = async (req, res, next) => {
   try {

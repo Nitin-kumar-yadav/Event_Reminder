@@ -1,6 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useUserAuthStore } from '../store/userAuthStore'
+import { useUserEventsStore } from '../store/userEvents';
+import toast from 'react-hot-toast';
 
 const CreateEventBox = ({ setIsVisible }) => {
+
+    const { checkAuth } = useUserAuthStore();
+    const { createEvent, isEventsLoading } = useUserEventsStore();
 
     const [eventData, setEventData] = useState({
         title: '',
@@ -8,6 +14,21 @@ const CreateEventBox = ({ setIsVisible }) => {
         date: '',
         time: ''
     })
+
+    useEffect(() => {
+        checkAuth()
+    })
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!eventData.title || !eventData.description || !eventData.date || !eventData.time) {
+            toast.error("Please fill in all fields");
+            return;
+        }
+        createEvent(eventData);
+        setIsVisible(false);
+    }
+
+
 
 
     return (
@@ -109,7 +130,7 @@ const CreateEventBox = ({ setIsVisible }) => {
                        text-white font-bold rounded-lg shadow-lg hover:shadow-xl 
                        transform hover:-translate-y-0.5 transition-all duration-200
                        flex items-center justify-center gap-2"
-
+                            onClick={handleSubmit}
                         >
                             Create Event
                         </button>

@@ -3,6 +3,8 @@ import { Clock2, ThermometerSun } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import CreateEventBox from './CreateEventBox';
+import EventCard from './EventCard';
+import { useUserEventsStore } from '../store/userEvents';
 
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
@@ -11,9 +13,9 @@ function Dashboard() {
     const [longitude, setLongitude] = useState(null);
     const [weatherData, setWeatherData] = useState(null);
     const [dateTime, setDateTime] = useState(new Date());
-    const [isVisible, setIsVisible] = useState(false); // Controls visibility of CreateEventBox
+    const [isVisible, setIsVisible] = useState(false);
 
-    // ... (Your getCoordinates, fetchWeather, and weather useEffect blocks remain the same) ...
+    const { userEvents } = useUserEventsStore();
     const getCoordinates = async () => {
         if (navigator.geolocation) {
             await navigator.geolocation.getCurrentPosition(
@@ -84,6 +86,8 @@ function Dashboard() {
         setIsVisible(true);
     }
 
+
+
     return (
         <div className='pt-20'>
             {isVisible ? <CreateEventBox setIsVisible={setIsVisible} /> : (
@@ -135,15 +139,22 @@ function Dashboard() {
                             <div className="flex flex-col justify-center gap-2 align-center ">
                                 <h1 className='text-2xl text-transparent bg-clip-text 
                 bg-gradient-to-r from-indigo-500 to-purple-400 font-extrabold'>Add Your Events</h1>
-                                <p className='text-base text-gray-500 font-medium'>0 event scheduled</p>
+                                <p className='text-base text-gray-500 font-medium'>{
+                                    userEvents.length
+                                } event scheduled</p>
                             </div>
                             <div className="flex justify-center align-center text-center pt-5">
                                 <button onClick={openEventBox} className='bg-gray-200 dark:bg-gray-700 rounded-lg text-xl font-medium w-[150px] h-[45px] text-purple-400'>Add Event</button>
                             </div>
                         </div>
                     </div>
+                    <div className="pt-2 mx-3 flex flex-row flex-wrap gap-3">
+                        <EventCard />
+                    </div>
                 </>
             )}
+
+
 
 
         </div>

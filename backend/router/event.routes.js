@@ -10,8 +10,8 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 router.post("/event/create", protectRoute, createEvent);
-router.get("/event/:eventId", protectRoute, viewEvent);
-router.put("/event/:eventId", protectRoute, editEvent);
-router.delete("/event/:eventId", protectRoute, deleteEvent);
+router.get("/event/:userId", protectRoute, viewEvent);
+router.put("/event/update/:eventId", protectRoute, editEvent);
+router.delete("/event/delete/:eventId", protectRoute, deleteEvent);
 
 export default router;
