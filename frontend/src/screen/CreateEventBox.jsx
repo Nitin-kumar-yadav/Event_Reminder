@@ -26,6 +26,7 @@ const CreateEventBox = ({ setIsVisible }) => {
         }
         createEvent(eventData);
         setIsVisible(false);
+        window.location.reload();
     }
 
 
@@ -51,9 +52,7 @@ const CreateEventBox = ({ setIsVisible }) => {
 
                 <form className="space-y-5">
                     <div className="relative group">
-                        {/* <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <p className="text-gray-400 group-focus-within:text-indigo-500 transition-colors" >Event Title</p>
-                        </div> */}
+
                         <input
                             type="text"
                             name={eventData.title}
@@ -69,9 +68,7 @@ const CreateEventBox = ({ setIsVisible }) => {
                         />
                     </div>
                     <div className="relative group">
-                        {/* <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <p className="text-gray-400 group-focus-within:text-indigo-500 transition-colors" >Event Discription</p>
-                        </div> */}
+
                         <input
                             type={"text"}
                             name={eventData.description}
@@ -88,9 +85,7 @@ const CreateEventBox = ({ setIsVisible }) => {
 
                     </div>
                     <div className="relative group">
-                        {/* <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <p className="text-gray-400 group-focus-within:text-indigo-500 transition-colors" >Event Date</p>
-                        </div> */}
+
                         <input
                             type={"date"}
                             name={eventData.date}

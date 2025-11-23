@@ -54,7 +54,6 @@ function Dashboard() {
         }
     }, [latitude, longitude]);
 
-    // ... (Your formatTime, formatFullDate, and clock useEffect blocks remain the same) ...
     const formatTime = (date) => date.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
@@ -89,74 +88,90 @@ function Dashboard() {
 
 
     return (
-        <div className='pt-20'>
+
+        <div className='pt-20 w-full mx-auto max-w-7xl px-4 md:px-6'>
             {isVisible ? <CreateEventBox setIsVisible={setIsVisible} /> : (
                 <>
-                    <div className="flex flex-row justify-between max-w-8xl mx-5 h-[150px] ">
-                        <div className="flex flex-col align-center justify-items-start w-[49%] rounded-2xl h-[150px] px-4 pt-5 bg-white/30 dark:bg-black/20 
-                        backdrop-blur-md 
-                        border-b border-white/20 dark:border-white/10
-                        shadow-lg transition-all duration-300">
-                            <div className="">
-                                <h1 className="text-base text-gray-500 font-medium">Current Time</h1>
-                            </div>
-                            <div className="flex flex-row justify-between aligin-center text-center">
-                                <h1 className="text-5xl text-center aligin-center font-bold pt-2 text-transparent bg-clip-text 
-                bg-gradient-to-r from-indigo-500 to-purple-400 ">{time}</h1>
-                                <div className="">
+
+                    <div className="flex flex-col md:flex-row justify-between w-full gap-4 mb-6">
+
+
+                        <div className="flex flex-col flex-1 rounded-2xl h-auto min-h-[150px] p-5 
+                            bg-white/30 dark:bg-black/20 backdrop-blur-md 
+                            border border-white/20 dark:border-white/10 shadow-lg transition-all duration-300">
+
+                            <h1 className="text-base text-gray-500 font-medium mb-1">Current Time</h1>
+
+                            <div className="flex justify-between items-center flex-1">
+                                <h1 className="text-5xl font-extrabold text-transparent bg-clip-text 
+                                    bg-gradient-to-r from-indigo-500 to-purple-400">
+                                    {time}
+                                </h1>
+                                <div>
                                     <Clock2 className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
                                 </div>
                             </div>
-                            <div className="">
-                                <h1 className="text-base text-gray-500 font-medium">{date}</h1>
-                            </div>
+
+                            <h1 className="text-base text-gray-500 font-medium mt-1">{date}</h1>
                         </div>
-                        <div className="flex flex-col align-center justify-items-start w-[49%] rounded-2xl h-[150px] px-4 pt-5 bg-white/30 dark:bg-black/20 
-                        backdrop-blur-md 
-                        border-b border-white/20 dark:border-white/10
-                        shadow-lg transition-all duration-300">
-                            <div className="">
-                                <h1 className="text-base text-gray-500 font-medium">Current Weather</h1>
-                            </div>
-                            <div className="flex flex-row justify-between aligin-center text-center">
-                                <h1 className="text-5xl text-center aligin-center font-bold pt-2 text-transparent bg-clip-text 
-                bg-gradient-to-r from-indigo-500 to-purple-400 ">{weatherData ? `${Math.round(weatherData.main.temp - 273.15)} C` : 'Loading...'}</h1>
-                                <div className="">
+
+
+                        <div className="flex flex-col flex-1 rounded-2xl h-auto min-h-[150px] p-5 
+                            bg-white/30 dark:bg-black/20 backdrop-blur-md 
+                            border border-white/20 dark:border-white/10 shadow-lg transition-all duration-300">
+
+                            <h1 className="text-base text-gray-500 font-medium mb-1">Current Weather</h1>
+
+                            <div className="flex justify-between items-center flex-1">
+                                <h1 className="text-5xl font-extrabold text-transparent bg-clip-text 
+                                    bg-gradient-to-r from-indigo-500 to-purple-400">
+                                    {weatherData ? `${Math.round(weatherData.main.temp - 273.15)}°C` : 'Loading...'}
+                                </h1>
+                                <div>
                                     <ThermometerSun className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
                                 </div>
                             </div>
-                            <div className="">
-                                <h1 className="text-base text-gray-500 font-medium">{weatherData?.name}, {weatherData?.sys?.country}</h1>
-                            </div>
+
+                            <h1 className="text-base text-gray-500 font-medium mt-1">
+                                {weatherData ? `${weatherData.name}, ${weatherData.sys.country}` : 'Fetching location...'}
+                            </h1>
                         </div>
 
                     </div>
-                    <div className="pt-5">
-                        <div className="flex flex-row justify-between max-w-8xl mx-5 h-[100px] px-5 bg-white/30 dark:bg-black/20 
-                        backdrop-blur-md 
-                        border-b border-white/20 dark:border-white/10
-                        shadow-lg transition-all duration-300 rounded-xl">
-                            <div className="flex flex-col justify-center gap-2 align-center ">
+
+                    <div className="pt-2 mb-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-center h-auto min-h-[100px] p-5 
+                            bg-white/30 dark:bg-black/20 backdrop-blur-md 
+                            border border-white/20 dark:border-white/10 shadow-lg transition-all duration-300 rounded-xl">
+
+                            <div className="flex flex-col justify-center items-start sm:items-start gap-1 mb-3 sm:mb-0">
                                 <h1 className='text-2xl text-transparent bg-clip-text 
-                bg-gradient-to-r from-indigo-500 to-purple-400 font-extrabold'>Add Your Events</h1>
-                                <p className='text-base text-gray-500 font-medium'>{
-                                    userEvents.length
-                                } event scheduled</p>
+                                    bg-gradient-to-r from-indigo-500 to-purple-400 font-extrabold'>
+                                    Manage Your Events
+                                </h1>
+                                <p className='text-base text-gray-500 font-medium'>
+                                    You have **{userEvents.length}** event{userEvents.length !== 1 ? 's' : ''} scheduled.
+                                </p>
                             </div>
-                            <div className="flex justify-center align-center text-center pt-5">
-                                <button onClick={openEventBox} className='bg-gray-200 dark:bg-gray-700 rounded-lg text-xl font-medium w-[150px] h-[45px] text-purple-400'>Add Event</button>
+
+                            <div className="w-full sm:w-auto flex justify-center items-center">
+                                <button
+                                    onClick={openEventBox}
+                                    className='bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
+                                    text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-300
+                                    w-full sm:w-[150px] h-[45px] text-base'
+                                >
+                                    + Add Event
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div className="pt-2 mx-3 flex flex-row flex-wrap gap-3">
+
+                    <div className="pt-2">
                         <EventCard />
                     </div>
                 </>
             )}
-
-
-
-
         </div>
     )
 }
