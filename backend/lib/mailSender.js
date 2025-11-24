@@ -9,6 +9,7 @@ dotenv.config({});
 
 const EMAIL = process.env.EMAIL;
 const PASS = process.env.PASS;
+const PORT_TRANSPORTER = process.env.PORT_TRANSPORTER;
 
 if (!EMAIL || !PASS) {
   console.error(
@@ -18,8 +19,8 @@ if (!EMAIL || !PASS) {
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
-  port: 587,
-  secure: false,
+  port: PORT_TRANSPORTER,
+  secure: PORT_TRANSPORTER === "465" ? true : false,
   auth: {
     user: EMAIL,
     pass: PASS,
