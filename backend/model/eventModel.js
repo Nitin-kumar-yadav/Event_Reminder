@@ -22,7 +22,10 @@ const eventSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    default: [],
+    reminderSent: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

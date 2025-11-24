@@ -28,6 +28,7 @@ const Navigation = () => {
             ? [
                 { name: 'Dashboard', path: '/', isButton: false },
                 { name: 'Logout', action: logout, isButton: true },
+                { name: `${authUser?.name}`, path: '/', isButton: false },
             ]
             : [
                 { name: 'Login', path: '/login', isButton: false },

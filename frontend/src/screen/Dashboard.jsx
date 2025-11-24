@@ -1,10 +1,10 @@
-import React, { use, useEffect, useState } from 'react'
-import { Clock2, ThermometerSun } from 'lucide-react';
 import axios from 'axios';
+import { Clock2, ThermometerSun } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useUserEventsStore } from '../store/userEvents';
 import CreateEventBox from './CreateEventBox';
 import EventCard from './EventCard';
-import { useUserEventsStore } from '../store/userEvents';
 
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;

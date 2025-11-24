@@ -51,92 +51,84 @@ export const viewEvent = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // 2. Correct validation message for missing parameter
     if (!userId) {
       return res
         .status(400)
         .json({ message: "User ID is required in the URL." });
     }
-
-    // 3. Find all events linked to this user ID
-    // Note: Mongoose automatically converts the string ID to an ObjectId
     const showEvent = await Event.find({ user: userId });
 
-    // 4. Correctly check if the array is empty (no events found)
     if (showEvent.length === 0) {
       return res
         .status(404)
         .json({ message: "No events found for this user." });
     }
-
-    // 5. Success: Return the array of events
     res.status(200).json(showEvent);
+    
   } catch (error) {
     console.log("Error in viewEvent:", error.message);
 
-    // Mongoose CastError usually occurs if the ID format is invalid (e.g., too short)
     if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid User ID format." });
+        return res.status(400).json({ message: "Invalid User ID format." });
+      }
+
+      res.status(500).json({ message: "Internal Server Error" });
     }
+  };
 
-    // General server error
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
+  export const editEvent = async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const { title, description, time, date } = req.body;
 
-export const editEvent = async (req, res) => {
-  try {
+      if (!eventId) {
+        return res.status(400).json({ message: "Event ID is required" });
+      }
+
+      const event = await Event.findById(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      event.title = title || event.title;
+      event.description = description || event.description;
+      event.time = time || event.time;
+      event.date = date || event.date;
+
+      const updatedEvent = await event.save();
+      res.status(200).json(updatedEvent);
+    } catch (error) {
+      console.log("Error in editEvent:", error.message);
+
+      if (error.name === "CastError") {
+        return res.status(400).json({ message: "Invalid Event ID format" });
+      }
+
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };
+
+  export const deleteEvent = async (req, res) => {
     const { eventId } = req.params;
-    const { title, description, time, date } = req.body;
+    try {
+      if (!eventId) {
+        return res.status(400).json({ message: "Event ID is required" });
+      }
 
-    if (!eventId) {
-      return res.status(400).json({ message: "Event ID is required" });
+      const event = await Event.findById(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      await Event.findByIdAndDelete(eventId);
+      res.status(200).json({ message: "Event deleted successfully" });
+    } catch (error) {
+      console.log("Error in deleteEvent:", error.message);
+
+      if (error.name === "CastError") {
+        return res.status(400).json({ message: "Invalid Event ID format" });
+      }
+
+      res.status(500).json({ message: "Internal Server Error" });
     }
-
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res.status(404).json({ message: "Event not found" });
-    }
-
-    event.title = title || event.title;
-    event.description = description || event.description;
-    event.time = time || event.time;
-    event.date = date || event.date;
-
-    const updatedEvent = await event.save();
-    res.status(200).json(updatedEvent);
-  } catch (error) {
-    console.log("Error in editEvent:", error.message);
-
-    if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid Event ID format" });
-    }
-
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-export const deleteEvent = async (req, res) => {
-  const { eventId } = req.params;
-  try {
-    if (!eventId) {
-      return res.status(400).json({ message: "Event ID is required" });
-    }
-
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res.status(404).json({ message: "Event not found" });
-    }
-
-    await Event.findByIdAndDelete(eventId);
-    res.status(200).json({ message: "Event deleted successfully" });
-  } catch (error) {
-    console.log("Error in deleteEvent:", error.message);
-
-    if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid Event ID format" });
-    }
-
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
+  };
