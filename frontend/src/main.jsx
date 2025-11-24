@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 
-export const BasicUrl = 'http://localhost:5000'
+export const BasicUrl = import.meta.env.VITE_BACKEND_URL
 createRoot(document.getElementById('root')).render(
 
   <BrowserRouter>
