@@ -21,9 +21,12 @@ export const useUserEventsStore = create((set, get) => ({
         }
       );
       const eventInfo = response?.data?.user || response?.data;
-      set({ userEvents: eventInfo });
+      set((state) => {
+        const updatedEvents = [...state.userEvents, eventInfo];
+        localStorage.setItem("userEvents", JSON.stringify(updatedEvents));
+        return { userEvents: updatedEvents };
+      });
       toast.success("Event created successfully!");
-      localStorage.setItem("userEvents", JSON.stringify(eventInfo));
     } catch (error) {
       toast.error("Failed to create event. Please try again.");
       console.error("Error creating event:", error);
@@ -64,7 +67,7 @@ export const useUserEventsStore = create((set, get) => ({
         eventsData = [];
       }
       set({ userEvents: eventsData });
-      localStorage.setItem("userEvents", JSON.stringify(events));
+      localStorage.setItem("userEvents", JSON.stringify(eventsData));
     } catch (error) {
       toast.error("Failed to fetch events. Please try again.");
       console.error("Error fetching events:", error);

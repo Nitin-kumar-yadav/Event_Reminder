@@ -54,21 +54,13 @@ export const signUp = async (req, res) => {
 
     const savedUser = await newUser.save();
 
-    setTimeout(async () => {
-      const user = await User.findById(savedUser._id);
-      if (user && !user.isVerified) {
-        await User.deleteOne({ _id: savedUser._id });
-        console.log(`Deleted unverified user: ${email}`);
-      }
-    }, 10 * 60 * 1000);
-
-    generateToken(savedUser._id, res);
     return res.status(201).json({
       message: "Signup successful. OTP sent!",
       user: {
         _id: savedUser._id,
         username: savedUser.username,
         email: savedUser.email,
+        isVerified: savedUser.isVerified,
       },
     });
   } catch (error) {
@@ -79,14 +71,13 @@ export const signUp = async (req, res) => {
 
 export const verifyEmail = async (req, res) => {
   try {
-    const { otp } = req.body;
-    const userId = req.user._id;
+    const { otp, email } = req.body;
 
     if (!otp) {
       return res.status(400).json({ message: "OTP is required" });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
@@ -143,6 +134,10 @@ export const logIn = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ message: "User does not exist" });
+    }
+
+    if (!user.isVerified) {
+      return res.status(400).json({ message: "Please verify your email before logging in" });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 const Signup = () => {
     const navigate = useNavigate();
 
-    const { signup, otpVerify, isSignUp, isOtpVerifying } = useUserAuthStore();
+    const { signup, isVerified, isSignUp, isOtpVerifying, authUser, otpVerify } = useUserAuthStore();
 
     const [formData, setFormData] = useState({
         username: "",
@@ -22,13 +22,19 @@ const Signup = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
 
-    // ------------------ HANDLE INPUT ------------------
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         if (error) setError("");
     };
 
-    // ------------------ SIGNUP ------------------
+    useEffect(() => {
+        const pendingEmail = localStorage.getItem("pendingSignupEmail");
+        if (pendingEmail) {
+            setFormData((prev) => ({ ...prev, email: pendingEmail }));
+            setStep(2);
+        }
+    }, []);
+
     const handleSignup = async (e) => {
         e.preventDefault();
         setError("");
@@ -53,14 +59,16 @@ const Signup = () => {
                     }
                 );
 
-                if (result) setStep(2);
+                if (result) {
+                    localStorage.setItem("pendingSignupEmail", formData.email);
+                    setStep(2);
+                }
             } catch (err) {
                 setError("Signup failed");
             }
         }
     };
 
-    // ------------------ OTP VERIFY ------------------
     const handleOtpSubmit = async (e) => {
         e.preventDefault();
 
@@ -78,8 +86,17 @@ const Signup = () => {
         );
 
         if (result) {
-            navigate("/");
+            localStorage.removeItem("pendingSignupEmail");
+            if (isVerified || authUser?.isVerified) navigate("/");
+            else setStep(2);
         }
+    };
+
+    const handleCancel = () => {
+        localStorage.removeItem("pendingSignupEmail");
+        setStep(1);
+        setOtp("");
+        setFormData({ ...formData, email: "" });
     };
 
     return (
@@ -88,14 +105,12 @@ const Signup = () => {
         dark:from-gray-900 dark:via-gray-800 dark:to-black
         transition-colors duration-300">
 
-            {/* THEME TOGGLE */}
+            
             <div className="absolute top-4 right-4">
                 <ThemeToggle />
             </div>
 
-            {/* ----------------------------------------------------------- */}
-            {/* ---------------------- SIGNUP STEP ------------------------ */}
-            {/* ----------------------------------------------------------- */}
+            
 
             {step === 1 && (
                 <div className="w-full max-w-md bg-white/30 dark:bg-black/30 backdrop-blur-xl 
@@ -113,7 +128,7 @@ const Signup = () => {
 
                     <form onSubmit={handleSignup} className="space-y-5">
 
-                        {/* Username */}
+                        
                         <div className="relative">
                             <User size={18} className="absolute inset-y-4 left-3 text-gray-400" />
                             <input
@@ -128,7 +143,7 @@ const Signup = () => {
                             />
                         </div>
 
-                        {/* Email */}
+                      
                         <div className="relative">
                             <Mail size={18} className="absolute inset-y-4 left-3 text-gray-400" />
                             <input
@@ -143,7 +158,7 @@ const Signup = () => {
                             />
                         </div>
 
-                        {/* Password */}
+                       
                         <div className="relative">
                             <Lock size={18} className="absolute inset-y-4 left-3 text-gray-400" />
                             <input
@@ -165,7 +180,7 @@ const Signup = () => {
                             </button>
                         </div>
 
-                        {/* Confirm Password */}
+                       
                         <div className="relative">
                             <Lock size={18} className="absolute inset-y-4 left-3 text-gray-400" />
                             <input
@@ -181,7 +196,7 @@ const Signup = () => {
                             />
                         </div>
 
-                        {/* Error Message */}
+                       
                         {error && (
                             <p className="text-red-500 text-xs text-center font-medium">
                                 {error}
@@ -242,6 +257,15 @@ const Signup = () => {
                 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2"
                         >
                             {isOtpVerifying ? "Verifying..." : <>Verify <ArrowRight size={18} /></>}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            className="w-full py-3 px-4 bg-gray-200 dark:bg-gray-700
+                text-gray-800 dark:text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2"
+                        >
+                            Cancel
                         </button>
                     </form>
                 </div>

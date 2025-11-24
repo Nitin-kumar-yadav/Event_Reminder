@@ -20,6 +20,8 @@ export const useUserAuthStore = create((set, get) => ({
   isSignUp: false,
   isLoggingIn: false,
   isOtpVerifying: false,
+  isVerified: false,
+
 
   checkAuth: async () => {
     try {
@@ -37,6 +39,7 @@ export const useUserAuthStore = create((set, get) => ({
 
   signup: async (userData) => {
     set({ isSignUp: true });
+    set({ isVerified: false });
 
     try {
       const res = await axios.post(`${BasicUrl}/api/v1/signup`, userData, {
@@ -46,8 +49,10 @@ export const useUserAuthStore = create((set, get) => ({
         withCredentials: true,
       });
 
-
-      return res.data.user;
+      set({ authUser: res?.data?.user.isVerified });
+      localStorage.setItem("isVerified", res?.data?.user.isVerified);
+      set({ isVerified: res?.data?.user.isVerified });
+      return res?.data?.user;
     } catch (error) {
       console.error("Signup error:", error);
       toast.error(
