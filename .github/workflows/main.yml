@@ -1,42 +1,73 @@
-name: Deploy to EC2
+name: Deploy Fullstack App on EC2
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [22.x]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            # Navigate to project directory
-            cd /home/${{ secrets.EC2_USER }}/Event_Reminder # Adjust path as needed
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
-            # Pull latest changes
-            git pull origin master
+      # ------------------------------
+      # BACKEND SETUP
+      # ------------------------------
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm install
 
-            # Backend Setup
-            cd backend
-            npm install
-            # Restart backend (assuming PM2 is used)
-            pm2 restart index || pm2 start index.js --name "backend"
+      - name: Create backend .env file
+        working-directory: ./backend
+        run: |
+          touch .env
+          echo "${{ secrets.PROD_BACKEND_ENV }}" > .env
 
-            # Frontend Setup
-            cd ../frontend
-            npm install
-            npm run build
-            # If serving frontend with PM2/serve or just Nginx pointing to dist
-            # Example for PM2 serving build folder (if applicable)
-            # pm2 restart frontend || pm2 serve dist 5173 --name "frontend"
-            # Or if using Nginx, just the build is enough if Nginx points to this dir
+      - name: Start backend with PM2
+        working-directory: ./backend
+        run: |
+          /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 restart backend || /home/ubuntu/.nvm/versions/node/v22.16.0/bin/pm2 start index.js --name backend
+
+      # ------------------------------
+      # FRONTEND SETUP
+      # ------------------------------
+      - name: Clean npm cache & remove existing dependencies
+        working-directory: ./frontend
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Create frontend .env file
+        working-directory: ./frontend
+        run: |
+          touch .env
+          echo "${{ secrets.PROD_FRONTEND_ENV }}" > .env
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Deploy frontend to Nginx
+        run: |
+          sudo rm -rf /var/www/html/*
+          sudo cp -r ./client/dist/* /var/www/html/
