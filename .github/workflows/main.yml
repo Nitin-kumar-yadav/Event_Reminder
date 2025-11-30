@@ -70,4 +70,8 @@ jobs:
       - name: Deploy frontend to Nginx
         run: |
           sudo rm -rf /var/www/html/*
+<<<<<<< HEAD
           sudo cp -r ./client/dist/* /var/www/html/
+=======
+          sudo cp -r ./client/dist/* /var/www/html/
+>>>>>>> 88e69676b0dd8b59b2f6428e0623d274982e917e
